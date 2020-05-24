@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/coke00/challenge/controllers"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
@@ -9,10 +10,9 @@ import (
 func main() {
 	r := mux.NewRouter()
 
-	// Route of Welcome
-	r.HandleFunc("/", showWelcome).Methods("GET")
-	r.HandleFunc("/api/contagiados", getContagiados).Methods("GET")
-	r.HandleFunc("/api/contagiados/{iso}", getContagiadosPais).Methods("GET")
+	r.HandleFunc("/", controllers.ShowWelcome).Methods("GET")
+	r.HandleFunc("/api/contagiados", controllers.GetContagiados).Methods("GET")
+	r.HandleFunc("/api/contagiados/{iso}", controllers.GetContagiadosPais).Methods("GET")
 
 	log.Fatal(http.ListenAndServe(":4203", r))
 }

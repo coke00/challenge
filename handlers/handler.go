@@ -1,4 +1,4 @@
-package main
+package handlers
 
 type Data struct {
 	Country      string `json:"country"`
@@ -13,7 +13,7 @@ type Contagiados struct {
 	Error string `json:"error"`
 }
 
-type retrieveSumary struct {
+type RetrieveSumary struct {
 	Global    *Global     `json:"Global"`
 	Countries []Countries `json:"Countries"`
 	Date      string      `json:"Date"`
