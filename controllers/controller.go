@@ -1,18 +1,20 @@
-package main
+package controllers
 
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/coke00/challenge/handlers"
+	"github.com/coke00/challenge/utils"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 )
 
 
-func getContagiados(writer http.ResponseWriter, request *http.Request) {
+func GetContagiados(writer http.ResponseWriter, request *http.Request) {
 	record, done, error := obtenerContagiosGlobales()
 	if done {
-		var contagiados Contagiados
+		var contagiados handlers.Contagiados
 		contagiados.Error = error.Error()
 		json.NewEncoder(writer).Encode(contagiados)
 		return
@@ -22,21 +24,21 @@ func getContagiados(writer http.ResponseWriter, request *http.Request) {
 	json.NewEncoder(writer).Encode(record)
 }
 
-func obtenerContagiosGlobales() (retrieveSumary, bool, error) {
-	url := goDotEnvVariable("UrlSumary")
+func obtenerContagiosGlobales() (handlers.RetrieveSumary, bool, error) {
+	url := utils.GoDotEnvVariable("UrlSumary")
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		log.Println("nuevoRequest: ", err)
-		return retrieveSumary{}, true, err
+		return handlers.RetrieveSumary{}, true, err
 	}
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Println("Obteniendo: ", err)
-		return retrieveSumary{}, true, err
+		return handlers.RetrieveSumary{}, true, err
 	}
 	defer resp.Body.Close()
-	var record retrieveSumary
+	var record handlers.RetrieveSumary
 	if err := json.NewDecoder(resp.Body).Decode(&record); err != nil {
 		log.Println(err)
 	}
@@ -44,12 +46,12 @@ func obtenerContagiosGlobales() (retrieveSumary, bool, error) {
 	return record, false, nil
 }
 
-func Find(crowd []Countries, x string) Data {
-	var std Data
+func Find(crowd []handlers.Countries, x string) handlers.Data {
+	var std handlers.Data
 	for i, v := range crowd {
 		if v.CountryCode == x {
 			fmt.Println("index  = ", i)
-			std := Data{Country : v.Country, Iso : v.CountryCode, Confirmed : v.TotalConfirmed, NewConfirmed :v.NewConfirmed, Deaths : v.TotalDeaths}
+			std := handlers.Data{Country : v.Country, Iso : v.CountryCode, Confirmed : v.TotalConfirmed, NewConfirmed :v.NewConfirmed, Deaths : v.TotalDeaths}
 			fmt.Println("std = ", std)
 			return std
 		}
@@ -57,17 +59,17 @@ func Find(crowd []Countries, x string) Data {
 	fmt.Println("std-for-exit = ", std)
 	return std
 }
-func showWelcome(writer http.ResponseWriter, request *http.Request) {
+func ShowWelcome(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Content-Type", "application/json")
 	fmt.Printf("hello")
 	json.NewEncoder(writer).Encode("welcome")
 }
 
-func getContagiadosPais(writer http.ResponseWriter, request *http.Request) {
+func GetContagiadosPais(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Content-Type", "application/json")
-	fmt.Printf("mostrando contagiados por pais")
+	fmt.Println("mostrando contagiados por pais")
 	params := mux.Vars(request)
-	var contagiados Contagiados
+	var contagiados handlers.Contagiados
 	record, done, error := obtenerContagiosGlobales()
 	if done {
 		contagiados.Error = error.Error()
@@ -78,7 +80,7 @@ func getContagiadosPais(writer http.ResponseWriter, request *http.Request) {
 	needle := params["iso"]
 	respuesta := Find(crowd, needle)
 	if respuesta.Iso != needle{
-		contagiados.Error = "Pais no encontrado"
+		contagiados.Error = "codigo de pais no existe"
 	}else{
 		contagiados.Data = &respuesta
 	}
